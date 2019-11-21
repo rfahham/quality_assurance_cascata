@@ -30,7 +30,6 @@ def lendoLista(arq):
     while linha != "":
         linha = arq.readline()
         url = linha.strip()
-        # print url
         listaArquivo.append(url)
     return listaArquivo
 
@@ -40,8 +39,10 @@ def executaRequests(listaUrl, arq_200, arq_401, arq_404, arq_500, arq_503):
     cont_404 = 0
     cont_500 = 0
     cont_503 = 0
+    
     for i in range(0, len(listaUrl)-1):
         r = requests.get(listaUrl[i], verify=False)
+       
         
         if (r.status_code == 200):
             writeFile(arq_200, listaUrl[i])
@@ -61,25 +62,29 @@ def executaRequests(listaUrl, arq_200, arq_401, arq_404, arq_500, arq_503):
         else: 
             print('Status Code desconhecido ')
     return(cont_200, cont_401, cont_404, cont_500, cont_503)
-    
-    # print("Status code " + str(r.status_code))
 
 
-def conta_request():
-
-
-def printQtdStatusCode(cont_200, cont_401, cont_404, cont_500, cont_503):
+def printQtdStatusCode(tr, cont_request, cont_200, cont_401, cont_404, cont_500, cont_503):
+    print
     print 'Sumary'
     print '---------------------------'
+    print
     print 'Total de urls verificadas:', (cont_200 + cont_401 + cont_404 + cont_500  + cont_503)
-    print 'Total de requests:', ()
+    print
     print 'Páginas Status Code 200:', (cont_200)
     print 'Páginas Status Code 401:', (cont_401)
     print 'Páginas Status Code 404:', (cont_404)
     print 'Páginas Status Code 500:', (cont_500)
     print 'Páginas Status Code 503:', (cont_503)
-    # print 'Protocolo:'()
+    print
     print '---------------------------'
+    print
+    print 'Throughput:', (cont_request)
+    print
+    print 'Tempo de Resposta(sec):', (tr), 'requests por segundo'
+    print
+    print
+
 
 listaUrl = []
 listaUrl = lendoLista(arq)
@@ -90,11 +95,14 @@ arq_200, arq_401, arq_404, arq_500, arq_503 = abrirPlanilhas()
 inicio = time.time()
 fim = time.time()
 total = fim - inicio
+cont_request = 0
 while (total) < tempo :
-    cont_200, cont_401, cont_404, cont_500, cont_503 = executaRequests(listaUrl, arq_200, arq_401, arq_404, arq_500, arq_503)    
+    cont_200, cont_401, cont_404, cont_500, cont_503 = executaRequests(listaUrl, arq_200, arq_401, arq_404, arq_500, arq_503)
+    cont_request += 1 
     fim = time.time()
     total = fim - inicio
-printQtdStatusCode(cont_200, cont_401, cont_404, cont_500, cont_503)
+tr = cont_request/tempo
+printQtdStatusCode(tr, cont_request, cont_200, cont_401, cont_404, cont_500, cont_503)
 
 timestamp_inicio = datetime.datetime.fromtimestamp(inicio)
 print("Inicio do teste: " + timestamp_inicio.strftime('%d-%m-%Y - %H:%M:%S'))
@@ -104,6 +112,9 @@ print("Fim do teste:    " + timestamp_fim.strftime('%d-%m-%Y - %H:%M:%S'))
 
 timestamp_total = datetime.datetime.fromtimestamp(total)
 print("Tempo de duração do teste:      " + timestamp_total.strftime(':%M:%S'))
+print
+print
+
 
 arq.close()
 arq_200.close()
